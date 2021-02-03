@@ -11,9 +11,10 @@ class DrawPage extends StatefulWidget {
 
 class _DrawPageState extends State<DrawPage> {
   var _path = Path();
-  var _color = Colors.red;
+  var _color = Color(0xFF2196F3);
   var _lineWidth = 5.0;
   var _onEraseMode = false;
+  Offset? _previousOffset;
   Offset? _currentOffset;
   final List<Line> _undoLines = [];
   final List<Line> _lines = [];
@@ -46,6 +47,7 @@ class _DrawPageState extends State<DrawPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
+      floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
       floatingActionButton: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -79,40 +81,137 @@ class _DrawPageState extends State<DrawPage> {
           ),
         ],
       ),
-      body: GestureDetector(
-        onPanStart: (details) {
-          var position = details.globalPosition;
-          setState(() {
-            _undoLines.clear();
-            _currentOffset = position;
-            _path.moveTo(position.dx, position.dy);
-          });
-        },
-        onPanUpdate: (details) {
-          var position = details.globalPosition;
-          setState(() {
-            _currentOffset = position;
-            _path.lineTo(position.dx, position.dy);
-          });
-        },
-        onPanEnd: (details) {
-          setState(() {
-            _currentOffset = null;
-            _lines.add(
-              Line(Path.from(_path), _color, _lineWidth,
-                  eraseMode: _onEraseMode),
-            );
-            _path.reset();
-          });
-        },
-        child: CustomPaint(
-          size: Size.infinite,
-          painter: DrawPainter(
-            _lines,
-            Line(Path.from(_path), _color, _lineWidth, eraseMode: _onEraseMode),
-            currentOffset: _currentOffset,
+      body: Stack(
+        children: [
+          GestureDetector(
+            onPanStart: (details) {
+              var position = details.globalPosition;
+              setState(() {
+                _undoLines.clear();
+                _currentOffset = position;
+                _path.moveTo(position.dx, position.dy);
+              });
+            },
+            onPanUpdate: (details) {
+              var position = details.globalPosition;
+
+              setState(() {
+                _currentOffset = position;
+                var dx = position.dx;
+                var dy = position.dy;
+
+                if (_previousOffset == null) {
+                  _path.lineTo(dx, dy);
+                } else {
+                  var previousDx = _previousOffset!.dx;
+                  var previousDy = _previousOffset!.dy;
+
+                  _path.quadraticBezierTo(
+                    previousDx,
+                    previousDy,
+                    (previousDx + dx) / 2,
+                    (previousDy + dy) / 2,
+                  );
+                }
+                _previousOffset = position;
+              });
+            },
+            onPanEnd: (details) {
+              setState(() {
+                _currentOffset = null;
+                _previousOffset = null;
+
+                _lines.add(
+                  Line(Path.from(_path), _color, _lineWidth,
+                      eraseMode: _onEraseMode),
+                );
+                _path.reset();
+              });
+            },
+            child: CustomPaint(
+              size: Size.infinite,
+              painter: DrawPainter(
+                _lines,
+                Line(
+                  Path.from(_path),
+                  _color,
+                  _lineWidth,
+                  eraseMode: _onEraseMode,
+                ),
+                currentOffset: _currentOffset,
+              ),
+            ),
           ),
-        ),
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Container(
+              height: 32.0,
+              width: 240.0,
+              decoration: BoxDecoration(
+                //背景颜色
+                color: Color(0x60cccccc),
+                //圆角半径
+                borderRadius: BorderRadius.all(Radius.circular(6.0)),
+              ),
+              margin: EdgeInsets.only(bottom: 18.0),
+              alignment: Alignment.center,
+              child: Row(
+                children: [
+                  SliderTheme(
+                    data: SliderTheme.of(context).copyWith(
+                        trackHeight: 4,
+                        activeTrackColor: _color,
+                        thumbColor: _color,
+                        valueIndicatorColor: _color,
+                        activeTickMarkColor: Colors.transparent,
+                        inactiveTrackColor: _color.withAlpha(100),
+                        inactiveTickMarkColor: Colors.transparent,
+                        thumbShape:
+                            RoundSliderThumbShape(enabledThumbRadius: 6),
+                        showValueIndicator: ShowValueIndicator.always),
+                    child: Slider(
+                      value: _lineWidth,
+                      min: 0,
+                      max: 10,
+                      divisions: 20,
+                      label: _lineWidth.toString(),
+                      onChanged: (v) {
+                        setState(() {
+                          _lineWidth = v;
+                        });
+                      },
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog();
+                        },
+                      );
+                    },
+                    child: Container(
+                      width: 24,
+                      height: 24,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.grey, width: 0.5),
+                      ),
+                      padding: EdgeInsets.all(3.0),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: _color,
+                        ),
+                      ),
+                    ),
+                  )
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

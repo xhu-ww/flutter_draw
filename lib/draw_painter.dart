@@ -17,6 +17,7 @@ class DrawPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     canvas.saveLayer(Offset.zero & size, Paint());
     for (Line line in lines) {
+
       _drawLine(canvas, line);
     }
     _drawLine(canvas, currentLine);
@@ -37,6 +38,8 @@ class DrawPainter extends CustomPainter {
       line.path,
       Paint()
         ..color = line.color
+        ..strokeCap = StrokeCap.round
+        ..strokeJoin = StrokeJoin.round
         ..strokeWidth = line.eraseMode ? ERASER_SIZE : line.width
         ..style = PaintingStyle.stroke
         ..blendMode = line.eraseMode ? BlendMode.clear : BlendMode.srcOver,
