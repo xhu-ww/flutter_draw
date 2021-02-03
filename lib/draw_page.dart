@@ -4,6 +4,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_draw/draw_painter.dart';
 
+import 'color_picker.dart';
+
 class DrawPage extends StatefulWidget {
   @override
   State<StatefulWidget> createState() => _DrawPageState();
@@ -187,7 +189,17 @@ class _DrawPageState extends State<DrawPage> {
                       showDialog(
                         context: context,
                         builder: (BuildContext context) {
-                          return AlertDialog();
+                          return AlertDialog(
+                            content: Container(
+                              width: 150,
+                              height: 300,
+                              child: ColorPicker(
+                                onColorChanged: (color) {
+                                  setState(() => _color = color);
+                                },
+                              ),
+                            ),
+                          );
                         },
                       );
                     },
