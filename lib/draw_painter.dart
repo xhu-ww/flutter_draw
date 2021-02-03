@@ -23,7 +23,7 @@ class DrawPainter extends CustomPainter {
     }
     _drawLine(canvas, currentLine);
     canvas.restore();
-    if (currentLine.eraseMode) {
+    if (currentLine.eraseMode && currentOffset != null) {
       canvas.drawRect(
           Rect.fromCenter(
             center: currentOffset,
