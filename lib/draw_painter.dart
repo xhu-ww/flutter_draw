@@ -9,11 +9,9 @@ const ERASER_SIZE = 20.0;
 class DrawPainter extends CustomPainter {
   final List<Line> lines;
   final Line currentLine;
-  final Offset currentOffset;
+  final Offset? currentOffset;
 
-  DrawPainter(this.lines, this.currentLine, {this.currentOffset})
-      : assert(lines != null),
-        assert(currentLine != null);
+  DrawPainter(this.lines, this.currentLine, {this.currentOffset});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -26,7 +24,7 @@ class DrawPainter extends CustomPainter {
     if (currentLine.eraseMode && currentOffset != null) {
       canvas.drawRect(
           Rect.fromCenter(
-            center: currentOffset,
+            center: currentOffset!,
             width: ERASER_SIZE,
             height: ERASER_SIZE,
           ),
@@ -38,8 +36,8 @@ class DrawPainter extends CustomPainter {
     canvas.drawPath(
       line.path,
       Paint()
-        ..color = line.color ?? Colors.blue
-        ..strokeWidth = line.eraseMode ? ERASER_SIZE : line.width ?? 5.0
+        ..color = line.color
+        ..strokeWidth = line.eraseMode ? ERASER_SIZE : line.width
         ..style = PaintingStyle.stroke
         ..blendMode = line.eraseMode ? BlendMode.clear : BlendMode.srcOver,
     );

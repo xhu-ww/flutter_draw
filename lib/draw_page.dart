@@ -14,7 +14,7 @@ class _DrawPageState extends State<DrawPage> {
   var _color = Colors.red;
   var _lineWidth = 5.0;
   var _onEraseMode = false;
-  Offset _currentOffset;
+  Offset? _currentOffset;
   final List<Line> _undoLines = [];
   final List<Line> _lines = [];
 
@@ -81,28 +81,26 @@ class _DrawPageState extends State<DrawPage> {
       ),
       body: GestureDetector(
         onPanStart: (details) {
+          var position = details.globalPosition;
           setState(() {
             _undoLines.clear();
-            _currentOffset = details.globalPosition;
-            _path.moveTo(_currentOffset.dx, _currentOffset.dy);
+            _currentOffset = position;
+            _path.moveTo(position.dx, position.dy);
           });
         },
         onPanUpdate: (details) {
+          var position = details.globalPosition;
           setState(() {
-            _currentOffset = details.globalPosition;
-            _path.lineTo(_currentOffset.dx, _currentOffset.dy);
+            _currentOffset = position;
+            _path.lineTo(position.dx, position.dy);
           });
         },
         onPanEnd: (details) {
           setState(() {
             _currentOffset = null;
             _lines.add(
-              Line(
-                path: Path.from(_path),
-                color: _color,
-                width: _lineWidth,
-                eraseMode: _onEraseMode,
-              ),
+              Line(Path.from(_path), _color, _lineWidth,
+                  eraseMode: _onEraseMode),
             );
             _path.reset();
           });
@@ -111,12 +109,7 @@ class _DrawPageState extends State<DrawPage> {
           size: Size.infinite,
           painter: DrawPainter(
             _lines,
-            Line(
-              path: Path.from(_path),
-              color: _color,
-              width: _lineWidth,
-              eraseMode: _onEraseMode,
-            ),
+            Line(Path.from(_path), _color, _lineWidth, eraseMode: _onEraseMode),
             currentOffset: _currentOffset,
           ),
         ),
@@ -131,7 +124,5 @@ class Line {
   double width;
   bool eraseMode;
 
-  Line({this.path, this.color, this.width, this.eraseMode = false})
-      : assert(path != null),
-        assert(eraseMode != null);
+  Line(this.path, this.color, this.width, {this.eraseMode = false});
 }
