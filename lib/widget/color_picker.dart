@@ -13,17 +13,21 @@ class ColorPicker extends StatefulWidget {
 class _ColorPickerState extends State<ColorPicker> {
   @override
   Widget build(BuildContext context) {
-    return GridView.count(
-      primary: false,
-      crossAxisSpacing: 10.0,
-      mainAxisSpacing: 10.0,
-      crossAxisCount: 4,
-      children: Colors.primaries
-          .map((e) => _buildColorItem(e, () {
-                Navigator.of(context).pop();
-                widget.onColorChanged?.call(e);
-              }))
-          .toList(),
+    return Container(
+      width: 150,
+      height: 300,
+      child: GridView.count(
+        primary: false,
+        crossAxisSpacing: 10.0,
+        mainAxisSpacing: 10.0,
+        crossAxisCount: 4,
+        children: Colors.primaries
+            .map((e) => _buildColorItem(e, () {
+                  Navigator.of(context).pop();
+                  widget.onColorChanged?.call(e);
+                }))
+            .toList(),
+      ),
     );
   }
 

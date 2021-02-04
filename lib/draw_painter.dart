@@ -34,14 +34,17 @@ class DrawPainter extends CustomPainter {
   }
 
   void _drawLine(Canvas canvas, Line line) {
+    var path = line.path;
+    if (path == null) return;
     canvas.drawPath(
-      line.path,
+      path,
       Paint()
         ..color = line.color
+        ..style = PaintingStyle.stroke
         ..strokeCap = StrokeCap.round
         ..strokeJoin = StrokeJoin.round
         ..strokeWidth = line.eraseMode ? ERASER_SIZE : line.width
-        ..style = PaintingStyle.stroke
+        ..isAntiAlias = true
         ..blendMode = line.eraseMode ? BlendMode.clear : BlendMode.srcOver,
     );
   }
